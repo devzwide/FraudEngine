@@ -7,10 +7,14 @@ trigger:
 stages:
 
 - stage: Build
+
   jobs:
-  - job: Build
+
+  - job: BuildAndPublish
+
     pool:
-      vmImage: 'windows-latest'
+      vmImage: FraudEngineAgentPool
+
     steps:
 
     - task: VSBuild@1
@@ -33,45 +37,47 @@ stages:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'dacpac'
 
-- stage: Deploy
-  dependsOn: Build
-  jobs:
-  - deployment: DeployDatabase
-    environment: 'dev'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
+# - stage: Deploy
+#   dependsOn: Build
+#   jobs:
+#   - deployment: DeployDatabase
+#     environment: 'dev'
+#     pool:
+#       name: FraudEngineAgentPool
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
 
-          - download: current
-            artifact: dacpac
+#           - download: current
+#             artifact: dacpac
 
-          - script: |
-              dotnet tool install -g Microsoft.SqlPackage
-              echo ##vso[task.prependpath]%USERPROFILE%\.dotnet\tools
-            displayName: 'Install SqlPackage'
+#           - script: |
+#               dotnet tool install -g Microsoft.SqlPackage
+#               echo ##vso[task.prependpath]%USERPROFILE%\.dotnet\tools
+#             displayName: 'Install SqlPackage'
 
-          - powershell: |
-              Write-Host "Pipeline Workspace:"
-              Get-ChildItem "$(Pipeline.Workspace)" -Recurse
+#           - powershell: |
+#               Write-Host "Pipeline Workspace:"
+#               Get-ChildItem "$(Pipeline.Workspace)" -Recurse
 
-              Write-Host "Listing DACPAC files..."
+#               Write-Host "Listing DACPAC files..."
 
-              $dacpacs = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac
+#               $dacpacs = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac
 
-              if ($dacpacs.Count -eq 0) {
-                  Write-Error "No DACPAC files found!"
-                  exit 1
-              }
+#               if ($dacpacs.Count -eq 0) {
+#                   Write-Error "No DACPAC files found!"
+#                   exit 1
+#               }
 
-              $dacpac = $dacpacs[0]
+#               $dacpac = $dacpacs[0]
 
-              Write-Host "Using DACPAC: $($dacpac.FullName)"
+#               Write-Host "Using DACPAC: $($dacpac.FullName)"
 
-              sqlpackage /Action:Publish `
-                /SourceFile:"$($dacpac.FullName)" `
-                /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
-            displayName: 'Deploy DACPAC'
+#               sqlpackage /Action:Publish `
+#                 /SourceFile:"$($dacpac.FullName)" `
+#                 /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
+#             displayName: 'Deploy DACPAC'
 
           # - script: |
           #     sqlpackage /Action:Publish ^
