@@ -1,3 +1,4 @@
+
 trigger:
   branches:
     include:
@@ -6,21 +7,50 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-steps:
-- task: VSBuild@1
-  displayName: 'Restore and Build Solution'
-  inputs:
-    solution: '**/*.sln'
-    platform: 'Any CPU'
-    configuration: 'Release'
-    msbuildArgs: '/t:Restore,Build'
-- task: CopyFiles@2
-  inputs:
-    Contents: '**\bin\Release\**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish DACPAC Artifact'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'dacpac'
-    publishLocation: 'Container'
+stages:
+
+# ---------------- BUILD ----------------
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+
+    - task: VSBuild@1
+      displayName: 'Restore and Build Solution'
+      inputs:
+        solution: '**/*.sln'
+        platform: 'Any CPU'
+        configuration: 'Release'
+        msbuildArgs: '/t:Restore,Build'
+
+    - task: CopyFiles@2
+      displayName: 'Copy DACPAC'
+      inputs:
+        contents: '**/*.dacpac'
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish DACPAC'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'dacpac'
+
+# ---------------- DEPLOY ----------------
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployDatabase
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - download: current
+            artifact: dacpac
+
+          - script: |
+              sqlpackage /Action:Publish ^
+                /SourceFile:"$(Pipeline.Workspace)/dacpac/**/*.dacpac" ^
+                /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
+            displayName: 'Deploy DACPAC'
