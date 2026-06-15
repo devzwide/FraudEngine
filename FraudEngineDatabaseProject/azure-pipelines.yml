@@ -16,5 +16,5 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish DACPAC Artifact'
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/FraudEngineDatabaseProject/bin/Release'
+    PathtoPublish: '$(Build.SourcesDirectory)/FraudEngineDatabaseProject/bin/Release'
     ArtifactName: 'dacpac'
