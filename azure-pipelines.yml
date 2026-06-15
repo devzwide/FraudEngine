@@ -1,9 +1,10 @@
 trigger:
-- main
+  branches:
+    include:
+      - main 
 
 pool:
-  vmImage: FraudEngineAgentPool
-
+  name: 'FraudEngineAgentPool' 
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
