@@ -4,14 +4,13 @@ trigger:
     include:
       - main
 
-pool:
-  vmImage: 'windows-latest'
-
 stages:
 
 - stage: Build
   jobs:
   - job: Build
+    pool:
+      vmImage: 'windows-latest'
     steps:
 
     - task: VSBuild@1
