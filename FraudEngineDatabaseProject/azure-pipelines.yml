@@ -7,12 +7,13 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Build SQL Project'
+- task: VSBuild@1
+  displayName: 'Restore and Build Solution'
   inputs:
-    command: 'build'
-    projects: '**/*.sln'
-    arguments: '--configuration Release'
+    solution: 'FraudEngineDatabaseProject.sln'
+    platform: 'Any CPU'
+    configuration: 'Release'
+    msbuildArgs: '/t:Restore,Build'
 - task: CopyFiles@2
   inputs:
     Contents: '**/*.dacpac'
