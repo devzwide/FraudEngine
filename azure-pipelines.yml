@@ -5,11 +5,32 @@ trigger:
 
 pool:
   name: 'FraudEngineAgentPool' 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+
+    - stage: 
+      
+      jobs:
+        
+        - job: BuildAndPublish
+          
+          steps:
+            
+            - task: VSBuild@1
+              inputs:
+                solution: '**/*.sln'
+                platform: 'Any CPU'
+                configuration: 'Release'
+                msbuildArgs: '/t:Restore,Build'
+
+            - task: CopyFiles@2
+              inputs:
+                Contents: '**/*.dacpac'
+                TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+            - task: PublishBuildArtifacts@1
+              inputs:
+                PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                ArtifactName: 'dacpac'
+
+
