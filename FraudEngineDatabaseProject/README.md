@@ -27,3 +27,18 @@ If you would like to use the command-line utility SqlPackage.exe for deploying t
 ```bash
 dotnet tool install -g microsoft.sqlpackage
 ```
+
+## Local development: create the sample database
+
+A convenience script `FraudEngineScript.sql` is included to create the schema and seed sample data for quick testing.
+
+- To run the script using `sqlcmd` against a local SQL Server instance:
+
+```powershell
+sqlcmd -S localhost -d master -i FraudEngineScript.sql -E
+```
+
+- Or open `FraudEngineScript.sql` in a SQL editor (SSMS / Azure Data Studio) and execute it against a database context of your choice.
+
+After running, check `dbo.FraudAlerts` and `dbo.Transactions` for seeded data and alerts.
+
