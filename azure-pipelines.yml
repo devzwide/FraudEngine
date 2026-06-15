@@ -8,7 +8,7 @@ pool:
 
 stages:
 
-    - stage: 
+    - stage: CI
       
       jobs:
         
@@ -34,3 +34,32 @@ stages:
                 ArtifactName: 'dacpac'
 
 
+    - stage: CD
+
+      dependsOn: CI
+
+      jobs:
+        
+        - job: DeployDatabase
+
+          steps:
+            
+            - download: current
+              artifact: dacpac
+
+            - powershell: |
+                Write-Host "Installing SqlPackage tool..."
+                dotnet tool install -g Microsoft.SqlPackage
+
+                $dacpacs = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac
+                if ($dacpacs.Count -eq 0) {
+                    Write-Error "No DACPAC files found!"
+                    exit 1
+                }
+                $dacpac = $dacpacs[0]
+                Write-Host "Found DACPAC: $($dacpac.FullName)"
+                
+                & "$env:USERPROFILE\.dotnet\tools\sqlpackage.exe" /Action:Publish `
+                                /SourceFile:"$($dacpac.FullName)" `
+                                /TargetConnectionString:"Server=localhost\MSSQLSERVER01;Database=FraudEngineDB;Trusted_Connection=True;TrustServerCertificate=True;"
+              displayName: 'Install and Deploy DACPAC via PowerShell'
