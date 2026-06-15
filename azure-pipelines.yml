@@ -8,7 +8,7 @@ pool:
 
 stages:
 
-    - stage: 
+    - stage: CI
       
       jobs:
         
@@ -34,3 +34,26 @@ stages:
                 ArtifactName: 'dacpac'
 
 
+    - stage: CD
+
+      dependsOn: CI
+
+      jobs:
+        
+        - job: DeployDatabase
+
+          steps:
+            
+            - download: current
+              artifact: dacpac
+
+            - task: SqlDacpacDeploymentOnMachineGroup@0
+              inputs:
+                TaskType: dacpac
+                DacpacFile: $(Pipeline.Workspace)/dacpac/**/*.dacpac
+                TargetMethod: server
+                ServerName: localhost
+                DatabaseName: FraudEngineDB
+                AuthScheme: windowsAuthentication
+
+        
