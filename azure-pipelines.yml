@@ -61,5 +61,5 @@ stages:
                 
                 & "$env:USERPROFILE\.dotnet\tools\sqlpackage.exe" /Action:Publish `
                                 /SourceFile:"$($dacpac.FullName)" `
-                                /TargetConnectionString:"Server=localhost\MSSQLSERVER01;Database=FraudEngineDB;Trusted_Connection=True;TrustServerCertificate=True;"
+                                /TargetConnectionString:"Server=localhost\MSSQLSERVER01;Database=master;Trusted_Connection=True;TrustServerCertificate=True;"
               displayName: 'Install and Deploy DACPAC via PowerShell'
