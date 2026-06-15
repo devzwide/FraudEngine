@@ -10,7 +10,7 @@ steps:
 - task: VSBuild@1
   displayName: 'Restore and Build Solution'
   inputs:
-    solution: 'FraudEngineDatabaseProject.sln'
+    solution: '**/*.sln'
     platform: 'Any CPU'
     configuration: 'Release'
     msbuildArgs: '/t:Restore,Build'
