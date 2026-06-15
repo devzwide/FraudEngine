@@ -12,3 +12,9 @@ steps:
   inputs:
     command: 'build'
     projects: '**/*.sqlproj'
+    arguments: '--configuration Release'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish DACPAC Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/**/bin/Release'
+    ArtifactName: 'dacpac'
