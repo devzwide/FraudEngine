@@ -53,9 +53,24 @@ stages:
             displayName: 'Install SqlPackage'
 
           - powershell: |
-              $dacpac = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac | Select-Object -First 1
+              Write-Host "Pipeline Workspace:"
+              Get-ChildItem "$(Pipeline.Workspace)" -Recurse
+
+              Write-Host "Listing DACPAC files..."
+
+              $dacpacs = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac
+
+              if ($dacpacs.Count -eq 0) {
+                  Write-Error "No DACPAC files found!"
+                  exit 1
+              }
+
+              $dacpac = $dacpacs[0]
+
+              Write-Host "Using DACPAC: $($dacpac.FullName)"
+
               sqlpackage /Action:Publish `
-                /SourceFile:$dacpac.FullName `
+                /SourceFile:"$($dacpac.FullName)" `
                 /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
             displayName: 'Deploy DACPAC'
 
