@@ -56,6 +56,6 @@ stages:
 
           - script: |
               sqlpackage /Action:Publish ^
-                /SourceFile:"$(Pipeline.Workspace)/dacpac/**/*.dacpac" ^
+                /SourceFile:"$(Pipeline.Workspace)\dacpac\FraudEngineDatabaseProject.dacpac" ^
                 /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
             displayName: 'Deploy DACPAC'
