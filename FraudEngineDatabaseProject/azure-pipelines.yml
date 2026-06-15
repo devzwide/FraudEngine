@@ -9,7 +9,6 @@ pool:
 
 stages:
 
-# ---------------- BUILD ----------------
 - stage: Build
   jobs:
   - job: Build
@@ -35,7 +34,6 @@ stages:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'dacpac'
 
-# ---------------- DEPLOY ----------------
 - stage: Deploy
   dependsOn: Build
   jobs:
@@ -54,8 +52,15 @@ stages:
               echo ##vso[task.prependpath]%USERPROFILE%\.dotnet\tools
             displayName: 'Install SqlPackage'
 
-          - script: |
-              sqlpackage /Action:Publish ^
-                /SourceFile:"$(Pipeline.Workspace)\dacpac\FraudEngineDatabaseProject.dacpac" ^
+          - powershell: |
+              $dacpac = Get-ChildItem "$(Pipeline.Workspace)\dacpac" -Recurse -Filter *.dacpac | Select-Object -First 1
+              sqlpackage /Action:Publish `
+                /SourceFile:$dacpac.FullName `
                 /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
             displayName: 'Deploy DACPAC'
+
+          # - script: |
+          #     sqlpackage /Action:Publish ^
+          #       /SourceFile:"$(Pipeline.Workspace)\dacpac\FraudEngineDatabaseProject.dacpac" ^
+          #       /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
+          #   displayName: 'Deploy DACPAC'
