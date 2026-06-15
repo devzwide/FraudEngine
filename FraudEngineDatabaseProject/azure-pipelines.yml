@@ -50,6 +50,11 @@ stages:
             artifact: dacpac
 
           - script: |
+              dotnet tool install -g Microsoft.SqlPackage
+              echo ##vso[task.prependpath]%USERPROFILE%\.dotnet\tools
+            displayName: 'Install SqlPackage'
+
+          - script: |
               sqlpackage /Action:Publish ^
                 /SourceFile:"$(Pipeline.Workspace)/dacpac/**/*.dacpac" ^
                 /TargetConnectionString:"Server=localhost;Database=FraudEngineDB;Trusted_Connection=True;"
